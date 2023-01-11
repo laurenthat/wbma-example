@@ -1,5 +1,6 @@
 import {useEffect, useState} from 'react';
 import {FlatList, StyleSheet, TouchableOpacity} from 'react-native';
+import {baseUrl} from '../utils/variables';
 import ListItem from './ListItem';
 
 // const mediaArray = [
@@ -36,14 +37,23 @@ import ListItem from './ListItem';
 // ];
 
 const List = () => {
-  const url =
-    'https://raw.githubusercontent.com/mattpe/wbma/master/docs/assets/test.json';
   const [mediaArray, setMediaArray] = useState([]);
 
   const loadMedia = async () => {
-    const response = await fetch(url);
-    const json = await response.json();
-    setMediaArray(json);
+    try {
+      const response = await fetch(baseUrl + 'media');
+      const json = await response.json();
+      const media = await Promise.all(
+        json.map(async (file) => {
+          const fileResponse = await fetch(baseUrl + 'media/' + file.file_id);
+          return await fileResponse.json();
+        })
+      ); //map is a function that iteratest the whole array and return an array of same length of the original array(20 latest files)
+
+      setMediaArray(media);
+    } catch (error) {
+      console.error('List, loadMedia', error);
+    }
   };
   useEffect(() => {
     loadMedia();
@@ -52,6 +62,7 @@ const List = () => {
   return (
     <FlatList
       data={mediaArray}
+      keyExtractor={(item, index) => index.toString()}
       renderItem={({item}) => <ListItem singleMedia={item} />}
     />
   );
