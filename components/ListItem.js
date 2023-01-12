@@ -19,10 +19,12 @@ import {uploadsUrl} from '../utils/variables';
 //   );
 // };
 
-const ListItem = ({singleMedia}) => {
+const ListItem = ({singleMedia, navigation}) => {
   const item = singleMedia;
   return (
-    <TouchableOpacity style={styles.row}>
+    <TouchableOpacity style={styles.row} onPress={() => {
+      navigation.navigate('Single', item);
+    }}>
       <View style={styles.box}>
         <Image
           style={styles.image}
@@ -60,6 +62,7 @@ const styles = StyleSheet.create({
 
 ListItem.propTypes = {
   singleMedia: PropTypes.object,
+  navigation: PropTypes.object
 };
 
 export default ListItem;
