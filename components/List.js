@@ -1,4 +1,4 @@
-import {FlatList, StyleSheet, TouchableOpacity} from 'react-native';
+import {FlatList, StyleSheet} from 'react-native';
 import {useMedia} from '../hooks/ApiHooks';
 import ListItem from './ListItem';
 
@@ -37,7 +37,6 @@ import ListItem from './ListItem';
 
 const List = () => {
   const {mediaArray} = useMedia();
-
   return (
     <FlatList
       data={mediaArray}
