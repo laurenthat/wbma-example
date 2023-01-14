@@ -5,7 +5,7 @@ import {uploadsUrl} from '../utils/variables';
 
 const Single = ({route}) => {
   console.log(route.params);
-  const {title, description, filename, time_added: timeAdded} = route.params; //time_added: timeAdded - so it doesn't complain cause it's not camel case we assign another name.
+  const {title, description, filename, time_added: timeAdded} = route.params; // time_added: timeAdded - so it doesn't complain cause it's not camel case we assign another name.
   return (
     <SafeAreaView style={styles.container}>
       <Text>{title}</Text>
@@ -30,7 +30,7 @@ const styles = StyleSheet.create({
   },
 });
 
-Single.PropTypes = {
+Single.propTypes = {
   route: PropTypes.object,
 };
 
