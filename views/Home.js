@@ -13,7 +13,7 @@ const Home = ({navigation}) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#ECF5FC',
     paddingTop: Platform.OS === 'android' ? 30 : 0,
   },
 });

@@ -15,6 +15,7 @@ const TabScreen = () => {
     <Tab.Navigator
       screenOptions={({route}) => {
         return {
+          tabBarStyle: {backgroundColor: '#ECF5FC'},
           tabBarIcon: ({focused, color, size}) => {
             let iconName;
             if (route.name === 'Home') {
@@ -23,12 +24,25 @@ const TabScreen = () => {
               iconName = 'person';
             }
 
-            return <Ionicons name={iconName} />;
+            return <Ionicons name={iconName} size={23} color={color} />;
           },
         };
       }}
     >
-      <Tab.Screen name="Home" component={Home} />
+      <Tab.Screen
+        name="Home"
+        component={Home}
+        options={{
+          headerStyle: {
+            backgroundColor: '#F35653',
+          },
+          headerTintColor: '#fff',
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
+          headerTitleAlign: 'center',
+        }}
+      />
       <Tab.Screen name="Profile" component={Profile} />
     </Tab.Navigator>
   );
@@ -40,7 +54,9 @@ const StackScreen = () => {
       <Stack.Screen
         name="Tabs"
         component={TabScreen}
-        options={{headerShown: false}}
+        options={{
+          headerShown: false,
+        }}
       />
       <Stack.Screen name="Single" component={Single} />
     </Stack.Navigator>
