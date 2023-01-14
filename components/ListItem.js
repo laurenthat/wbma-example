@@ -1,6 +1,7 @@
 import {Image, StyleSheet, View, Text, TouchableOpacity} from 'react-native';
 import PropTypes from 'prop-types';
 import {uploadsUrl} from '../utils/variables';
+// import noInlineStyles from 'eslint-plugin-react-native/lib/rules/no-inline-styles';
 
 const ListItem = ({singleMedia, navigation}) => {
   const item = singleMedia;
@@ -19,7 +20,7 @@ const ListItem = ({singleMedia, navigation}) => {
       </View>
       <View style={styles.box}>
         <Text style={styles.listTitle}>{item.title}</Text>
-        <Text>{item.description}</Text>
+        <Text style={styles.listDescription}>{item.description}</Text>
       </View>
     </TouchableOpacity>
   );
@@ -57,6 +58,10 @@ const styles = StyleSheet.create({
     fontSize: 20,
     paddingBottom: 15,
     paddingLeft: 5,
+  },
+  listDescription: {
+    padding: 5,
+    paddingTop: 0,
   },
 });
 
