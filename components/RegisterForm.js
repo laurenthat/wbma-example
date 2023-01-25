@@ -6,7 +6,7 @@ import {useForm, Controller} from 'react-hook-form';
 const RegisterForm = () => {
   // const {setIsLoggedIn} = useContext(MainContext);
   // const {postLogin} = useAuthentication();
-  const {postUser} = useUser();
+  const {postUser, checkUsername} = useUser();
   const {
     control,
     handleSubmit,
@@ -18,6 +18,7 @@ const RegisterForm = () => {
       email: '',
       full_name: '',
     },
+    mode: 'onBlur', // When the user leaves the field it validates the field right away. The default is onSubmit
   });
 
   const register = async (registerData) => {
@@ -31,18 +32,26 @@ const RegisterForm = () => {
       // TODO: notify user about failed login attempt
     }
   };
+
+  const checkUser = async (username) => {
+    const userAvailable = await checkUsername(username);
+    console.log('checkUser', userAvailable);
+    return userAvailable || 'Username is already taken';
+  };
+
   return (
     <View>
       <Text>Registration form</Text>
       <Controller
         control={control}
-        rules={{required: true, minLength: 3}}
+        rules={{required: true, minLength: 3, validate: checkUser}}
         render={({field: {onChange, onBlur, value}}) => (
           <TextInput
             placeholder="Username"
             onBlur={onBlur}
             onChangeText={onChange}
             value={value}
+            autoCapitalize="none"
           />
         )}
         name="username"
@@ -77,6 +86,7 @@ const RegisterForm = () => {
             onBlur={onBlur}
             onChangeText={onChange}
             value={value}
+            autoCapitalize="none"
           />
         )}
         name="email"
@@ -92,6 +102,7 @@ const RegisterForm = () => {
             onBlur={onBlur}
             onChangeText={onChange}
             value={value}
+            autoCapitalize="words"
           />
         )}
         name="full_name"

@@ -94,7 +94,17 @@ const useUser = () => {
   };
   // delete user const deleteUser
   // add a new user const addUser
-  return {getUserByToken, postUser};
+
+  const checkUsername = async (username) => {
+    try {
+      // TODO: use fetch to send request to login endpoint and return the result as json, handle errors with try/catch and response.ok
+      const result = await doFetch(baseUrl + 'users/username/' + username);
+      return result.available;
+    } catch (error) {
+      throw new Error('checkUsername: ' + error.message);
+    }
+  };
+  return {getUserByToken, postUser, checkUsername};
 };
 
 const useTag = () => {
