@@ -23,6 +23,7 @@ const Profile = () => {
   useEffect(() => {
     loadAvatar();
   }, []);
+
   return (
     <Card>
       <Card.Title>{user.username}</Card.Title>
