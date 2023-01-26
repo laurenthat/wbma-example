@@ -2,7 +2,7 @@ import React from 'react';
 import {View} from 'react-native';
 import {useUser} from '../hooks/ApiHooks';
 import {useForm, Controller} from 'react-hook-form';
-import {Input, Button, Text} from '@rneui/base';
+import {Input, Button, Card} from '@rneui/base';
 
 const RegisterForm = () => {
   // const {setIsLoggedIn} = useContext(MainContext);
@@ -10,12 +10,14 @@ const RegisterForm = () => {
   const {postUser, checkUsername} = useUser();
   const {
     control,
+    getValues,
     handleSubmit,
     formState: {errors},
   } = useForm({
     defaultValues: {
       username: '',
       password: '',
+      confirmPassword: '',
       email: '',
       full_name: '',
     },
@@ -23,6 +25,7 @@ const RegisterForm = () => {
   });
 
   const register = async (registerData) => {
+    delete registerData.confirmPassword;
     console.log('Registering: ', registerData);
     // const data = {username: 'sebu', password: 'sebu1234'};
     try {
@@ -45,8 +48,8 @@ const RegisterForm = () => {
   };
 
   return (
-    <View>
-      <Text>Registration form</Text>
+    <Card>
+      <Card.Title>Registration form</Card.Title>
       <Controller
         control={control}
         rules={{
@@ -66,15 +69,11 @@ const RegisterForm = () => {
         )}
         name="username"
       />
-      {/* {errors.username?.type === 'required' && <Text>is required.</Text>}
-      {errors.username?.type === 'minLength' && (
-        <Text>min length is 3 characters.</Text>
-      )} */}
 
       <Controller
         control={control}
         rules={{
-          require: {
+          required: {
             value: true,
             message: 'min 5 characters, needs one number, one uppercase letter',
           },
@@ -95,11 +94,42 @@ const RegisterForm = () => {
         )}
         name="password"
       />
-      {/* {errors.password && <Text>Password (min. 5 char) is required.</Text>} */}
 
       <Controller
         control={control}
-        rules={{required: true}}
+        rules={{
+          validate: (value) => {
+            if (value === getValues('password')) {
+              return true;
+            } else {
+              return 'password must match';
+            }
+          },
+        }}
+        render={({field: {onChange, onBlur, value}}) => (
+          <Input
+            placeholder="Confirm Password"
+            onBlur={onBlur}
+            onChangeText={onChange}
+            value={value}
+            secureTextEntry={true}
+            errorMessage={
+              errors.confirmPassword && errors.confirmPassword.message
+            }
+          />
+        )}
+        name="confirmPassword"
+      />
+
+      <Controller
+        control={control}
+        rules={{
+          required: {value: true, message: 'email is required'},
+          pattern: {
+            value: /^[a-z0-9.-]{1,64}@[a-z0-9.-]{3,64}/i,
+            message: 'Must be a valid email',
+          },
+        }}
         render={({field: {onChange, onBlur, value}}) => (
           <Input
             placeholder="Email"
@@ -107,15 +137,17 @@ const RegisterForm = () => {
             onChangeText={onChange}
             value={value}
             autoCapitalize="none"
+            errorMessage={errors.email && errors.email.message}
           />
         )}
         name="email"
       />
-      {errors.email?.type === 'required' && <Text>is required.</Text>}
 
       <Controller
         control={control}
-        rules={{required: true, minLength: 3}}
+        rules={{
+          minLength: {value: 3, message: 'Must be at least 3 characters'},
+        }}
         render={({field: {onChange, onBlur, value}}) => (
           <Input
             placeholder="Full Name"
@@ -123,18 +155,14 @@ const RegisterForm = () => {
             onChangeText={onChange}
             value={value}
             autoCapitalize="words"
+            errorMessage={errors.full_name && errors.full_name.message}
           />
         )}
         name="full_name"
       />
-      {errors.full_name?.type === 'minLength' && (
-        <Text>min length is 3 characters.</Text>
-      )}
       <Button title="Sign in!" onPress={handleSubmit(register)} />
-    </View>
+    </Card>
   );
 };
-
-RegisterForm.propTypes = {};
 
 export default RegisterForm;
