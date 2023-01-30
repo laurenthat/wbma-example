@@ -8,6 +8,7 @@ import Single from '../views/Single';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {MainContext} from '../contexts/MainContext';
 import Login from '../views/Login';
+import EditProfile from '../views/EditProfile';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -48,6 +49,7 @@ const StackScreen = () => {
             options={{headerShown: false}}
           />
           <Stack.Screen name="Single" component={Single} />
+          <Stack.Screen name="EditProfile" component={EditProfile} />
         </>
       ) : (
         <Stack.Screen name="Login" component={Login}></Stack.Screen>

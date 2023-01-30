@@ -92,6 +92,24 @@ const useUser = () => {
       throw new Error('postUser: ' + error.message);
     }
   };
+
+  const putUser = async (token, userData) => {
+    const options = {
+      method: 'PUT',
+      headers: {
+        'x-access-token': token,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(userData),
+    };
+    try {
+      // TODO: use fetch to send request to login endpoint and return the result as json, handle errors with try/catch and response.ok
+      const loginResult = await doFetch(baseUrl + 'users', options);
+      return loginResult;
+    } catch (error) {
+      throw new Error('postUser: ' + error.message);
+    }
+  };
   // delete user const deleteUser
   // add a new user const addUser
 
