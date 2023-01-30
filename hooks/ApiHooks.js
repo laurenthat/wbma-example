@@ -1,4 +1,5 @@
-import {useEffect, useState} from 'react';
+import {useContext, useEffect, useState} from 'react';
+import {MainContext} from '../contexts/MainContext';
 import {baseUrl} from '../utils/variables';
 
 const doFetch = async (url, options) => {
@@ -15,6 +16,7 @@ const doFetch = async (url, options) => {
 
 const useMedia = () => {
   const [mediaArray, setMediaArray] = useState([]);
+  const {update} = useContext(MainContext);
 
   const loadMedia = async () => {
     try {
@@ -33,9 +35,27 @@ const useMedia = () => {
     }
   };
   useEffect(() => {
-    loadMedia();
-  }, []); // a hook or a function that gets started each time the component starts. We use it to exit an infinite loop in the app
-  return {mediaArray}; // it's befind brackets because it is equal to {mediaArray: mediaArray}
+    loadMedia(); // load media when update state changes in main context;
+    // add update state to the array below.
+  }, [update]); // a hook or a function that gets started each time the component starts. We use it to exit an infinite loop in the app
+  const postMedia = async (fileData, token) => {
+    const options = {
+      method: 'post',
+      headers: {
+        'x-access-token': token,
+        'Content-Type': 'multipart/form-data',
+      },
+      body: fileData,
+    };
+    try {
+      // TODO: use fetch to send request to login endpoint and return the result as json, handle errors with try/catch and response.ok
+      const loginResult = await doFetch(baseUrl + 'media', options);
+      return loginResult;
+    } catch (error) {
+      throw new Error('postUpload: ' + error.message);
+    }
+  };
+  return {mediaArray, postMedia}; // it's befind brackets because it is equal to {mediaArray: mediaArray}
 };
 
 const useAuthentication = () => {
