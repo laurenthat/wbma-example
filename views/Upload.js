@@ -168,12 +168,13 @@ const Upload = ({navigation}) => {
           />
           <Button title="Pick a file" onPress={pickFile} />
           <Button
+            loading={loading}
             disabled={!mediafile.uri || errors.title || errors.description}
             title="Upload"
             onPress={handleSubmit(uploadFile)}
           />
           <Button title={'Reset'} onPress={resetForm} type="outline"></Button>
-          {loading && <ActivityIndicator size="large" />}
+          {/* {loading && <ActivityIndicator size="large" />} */}
         </Card>
       </TouchableOpacity>
     </ScrollView>
