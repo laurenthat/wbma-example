@@ -1,10 +1,10 @@
 import React, {useEffect, useRef, useState} from 'react';
-import PropTypes from 'prop-types';
 import {uploadsUrl} from '../utils/variables';
-import {Card, Icon, ListItem, Text} from '@rneui/base';
+import PropTypes from 'prop-types';
+import {Text, Card, ListItem, Icon} from '@rneui/themed';
 import {Video} from 'expo-av';
 import {ScrollView} from 'react-native';
-import {useUser} from '../hooks/ApiHooks';
+import {useFavourite, useUser} from '../hooks/ApiHooks';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Single = ({route}) => {
@@ -16,11 +16,15 @@ const Single = ({route}) => {
     time_added: timeAdded,
     user_id: userId,
     media_type: type,
-    screenshot,
-  } = route.params; // time_added: timeAdded - so it doesn't complain cause it's not camel case we assign another name.
+    file_id: fileId,
+  } = route.params;
   const video = useRef(null);
   const [owner, setOwner] = useState({});
+  const [likes, setLikes] = useState([]);
+  const [userLikesIt, setUserLikesIt] = useState(false);
   const {getUserById} = useUser();
+  const {getFavouritesByFileId, postFavourite, deleteFavourite} =
+    useFavourite();
 
   const getOwner = async () => {
     const token = await AsyncStorage.getItem('userToken');
@@ -29,9 +33,40 @@ const Single = ({route}) => {
     setOwner(owner);
   };
 
+  const getLikes = async () => {
+    const likes = await getFavouritesByFileId(fileId);
+    console.log('likes', likes);
+    setLikes(likes);
+    // TODO: check if the current user id is included in the 'likes' array and
+    // set the 'userLikesIt' accordingly
+  };
+
+  const likeFile = async () => {
+    try {
+      const token = await AsyncStorage.getItem('userToken');
+      await postFavourite(fileId, token);
+      getLikes();
+    } catch (error) {
+      // note: you cannot like same file multiple times
+      // console.log(error);
+    }
+  };
+  const dislikeFile = async () => {
+    try {
+      const token = await AsyncStorage.getItem('userToken');
+      await deleteFavourite(fileId, token);
+      getLikes();
+    } catch (error) {
+      // note: you cannot like same file multiple times
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
     getOwner();
+    getLikes();
   }, []);
+
   return (
     <ScrollView>
       <Card>
@@ -50,8 +85,6 @@ const Single = ({route}) => {
               console.log(error);
             }}
             isLooping
-            usePoster
-            posterSource={{uri: uploadsUrl + screenshot}}
           />
         )}
         <Card.Divider />
@@ -69,6 +102,14 @@ const Single = ({route}) => {
           <Text>
             {owner.username} ({owner.full_name})
           </Text>
+        </ListItem>
+        <ListItem>
+          {userLikesIt ? (
+            <Icon name="favorite" color="red" onPress={dislikeFile} />
+          ) : (
+            <Icon name="favorite-border" onPress={likeFile} />
+          )}
+          <Text>Total likes: {likes.length}</Text>
         </ListItem>
       </Card>
     </ScrollView>

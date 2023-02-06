@@ -4,7 +4,7 @@ import {appId, baseUrl} from '../utils/variables';
 
 const doFetch = async (url, options) => {
   const response = await fetch(url, options);
-  const json = await response.json(); // or return await response.json();
+  const json = await response.json();
   if (!response.ok) {
     const message = json.error
       ? `${json.message}: ${json.error}`
@@ -24,23 +24,23 @@ const useMedia = () => {
       // const json = await response.json();
       const json = await useTag().getFilesByTag(appId);
       json.reverse();
-
       const media = await Promise.all(
         json.map(async (file) => {
           const fileResponse = await fetch(baseUrl + 'media/' + file.file_id);
           return await fileResponse.json();
         })
-      ); // map is a function that iteratest the whole array and return an array of same length of the original array(20 latest files)
-
+      );
       setMediaArray(media);
     } catch (error) {
       console.error('List, loadMedia', error);
     }
   };
   useEffect(() => {
-    loadMedia(); // load media when update state changes in main context;
-    // add update state to the array below.
-  }, [update]); // a hook or a function that gets started each time the component starts. We use it to exit an infinite loop in the app
+    loadMedia();
+    // load media when update state changes in main context
+    // by adding update state to the array below
+  }, [update]);
+
   const postMedia = async (fileData, token) => {
     const options = {
       method: 'post',
@@ -51,14 +51,13 @@ const useMedia = () => {
       body: fileData,
     };
     try {
-      // TODO: use fetch to send request to login endpoint and return the result as json, handle errors with try/catch and response.ok
-      const loginResult = await doFetch(baseUrl + 'media', options);
-      return loginResult;
+      return await doFetch(baseUrl + 'media', options);
     } catch (error) {
       throw new Error('postUpload: ' + error.message);
     }
   };
-  return {mediaArray, postMedia}; // it's befind brackets because it is equal to {mediaArray: mediaArray}
+
+  return {mediaArray, postMedia};
 };
 
 const useAuthentication = () => {
@@ -66,7 +65,7 @@ const useAuthentication = () => {
     // user credentials format: {username: 'someUsername', password: 'somePassword'}
     const options = {
       // TODO: add method, headers and body for sending json data with POST
-      method: 'POST',
+      method: 'post',
       headers: {
         'Content-Type': 'application/json',
       },
@@ -74,53 +73,45 @@ const useAuthentication = () => {
     };
     try {
       // TODO: use fetch to send request to login endpoint and return the result as json, handle errors with try/catch and response.ok
-      const loginResult = await doFetch(baseUrl + 'login', options);
-      return loginResult;
+      return await doFetch(baseUrl + 'login', options);
     } catch (error) {
       throw new Error('postLogin: ' + error.message);
     }
   };
-
   return {postLogin};
 };
 
 // https://media.mw.metropolia.fi/wbma/docs/#api-User
 const useUser = () => {
-  // https://media.mw.metropolia.fi/wbma/docs/#api-User-CheckUserName
   const getUserByToken = async (token) => {
+    // call https://media.mw.metropolia.fi/wbma/docs/#api-User-CheckUserName
     const options = {
       method: 'GET',
       headers: {'x-access-token': token},
     };
     try {
-      // TODO: use fetch to send request to login endpoint and return the result as json, handle errors with try/catch and response.ok
       return await doFetch(baseUrl + 'users/user', options);
     } catch (error) {
-      throw new Error('getUserByToken: ' + error.message);
+      throw new Error('checkUser: ' + error.message);
     }
   };
   const postUser = async (userData) => {
     const options = {
-      method: 'POST',
+      method: 'post',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(userData),
     };
     try {
-      // TODO: use fetch to send request to login endpoint and return the result as json, handle errors with try/catch and response.ok
-      const loginResult = await doFetch(baseUrl + 'users', options);
-      return loginResult;
+      return await doFetch(baseUrl + 'users', options);
     } catch (error) {
       throw new Error('postUser: ' + error.message);
     }
   };
-  // delete user const deleteUser
-  // add a new user const addUser
 
   const checkUsername = async (username) => {
     try {
-      // TODO: use fetch to send request to login endpoint and return the result as json, handle errors with try/catch and response.ok
       const result = await doFetch(baseUrl + 'users/username/' + username);
       return result.available;
     } catch (error) {
@@ -137,6 +128,7 @@ const useUser = () => {
       throw new Error('getUserById, ' + error.message);
     }
   };
+
   return {getUserByToken, postUser, checkUsername, getUserById};
 };
 
@@ -148,6 +140,7 @@ const useTag = () => {
       throw new Error('getFilesByTag, ' + error.message);
     }
   };
+
   const postTag = async (data, token) => {
     const options = {
       method: 'post',
@@ -158,9 +151,7 @@ const useTag = () => {
       body: JSON.stringify(data),
     };
     try {
-      // TODO: use fetch to send request to login endpoint and return the result as json, handle errors with try/catch and response.ok
-      const loginResult = await doFetch(baseUrl + 'tags', options);
-      return loginResult;
+      return await doFetch(baseUrl + 'tags', options);
     } catch (error) {
       throw new Error('postTag: ' + error.message);
     }
@@ -168,4 +159,52 @@ const useTag = () => {
   return {getFilesByTag, postTag};
 };
 
-export {useMedia, useAuthentication, useUser, useTag};
+const useFavourite = () => {
+  const postFavourite = async (fileId, token) => {
+    const options = {
+      method: 'post',
+      headers: {
+        'x-access-token': token,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({file_id: fileId}),
+    };
+    try {
+      return await doFetch(baseUrl + 'favourites', options);
+    } catch (error) {
+      throw new Error('posFavourite: ' + error.message);
+    }
+  };
+  const getFavouritesByFileId = async (fileId) => {
+    try {
+      return await doFetch(baseUrl + 'favourites/file/' + fileId);
+    } catch (error) {
+      throw new Error('getFavouriterByFileId error, ' + error.message);
+    }
+  };
+  const getFavouritesByUser = async (token) => {
+    // TODO: implement this
+  };
+  const deleteFavourite = async (fileId, token) => {
+    const options = {
+      method: 'delete',
+      headers: {
+        'x-access-token': token,
+      },
+    };
+    try {
+      return await doFetch(baseUrl + 'favourites/file/' + fileId, options);
+    } catch (error) {
+      throw new Error('deleteFavourite error, ' + error.message);
+    }
+  };
+
+  return {
+    postFavourite,
+    getFavouritesByFileId,
+    getFavouritesByUser,
+    deleteFavourite,
+  };
+};
+
+export {useMedia, useAuthentication, useUser, useTag, useFavourite};
