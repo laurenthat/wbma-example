@@ -1,34 +1,79 @@
-import React from 'react';
-import {StyleSheet, SafeAreaView, Text, Image} from 'react-native';
+import React, {useEffect, useRef, useState} from 'react';
 import PropTypes from 'prop-types';
 import {uploadsUrl} from '../utils/variables';
+import {Card, Icon, ListItem, Text} from '@rneui/base';
+import {Video} from 'expo-av';
+import {ScrollView} from 'react-native';
+import {useUser} from '../hooks/ApiHooks';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Single = ({route}) => {
   console.log(route.params);
-  const {title, description, filename, time_added: timeAdded} = route.params; // time_added: timeAdded - so it doesn't complain cause it's not camel case we assign another name.
+  const {
+    title,
+    description,
+    filename,
+    time_added: timeAdded,
+    user_id: userId,
+    media_type: type,
+    screenshot,
+  } = route.params; // time_added: timeAdded - so it doesn't complain cause it's not camel case we assign another name.
+  const video = useRef(null);
+  const [owner, setOwner] = useState({});
+  const {getUserById} = useUser();
+
+  const getOwner = async () => {
+    const token = await AsyncStorage.getItem('userToken');
+    const owner = await getUserById(userId, token);
+    console.log(owner);
+    setOwner(owner);
+  };
+
+  useEffect(() => {
+    getOwner();
+  }, []);
   return (
-    <SafeAreaView style={styles.container}>
-      <Text>{title}</Text>
-      <Image style={styles.image} source={{uri: uploadsUrl + filename}} />
-      <Text>{timeAdded}</Text>
-      <Text>{description}</Text>
-    </SafeAreaView>
+    <ScrollView>
+      <Card>
+        <Card.Title>{title}</Card.Title>
+        <Card.Divider />
+        {type === 'image' ? (
+          <Card.Image source={{uri: uploadsUrl + filename}} />
+        ) : (
+          <Video
+            ref={video}
+            source={{uri: uploadsUrl + filename}}
+            style={{width: '100%', height: 200}}
+            resizeMode="cover"
+            useNativeControls
+            onError={(error) => {
+              console.log(error);
+            }}
+            isLooping
+            usePoster
+            posterSource={{uri: uploadsUrl + screenshot}}
+          />
+        )}
+        <Card.Divider />
+        {description && (
+          <ListItem>
+            <Text>{description}</Text>
+          </ListItem>
+        )}
+        <ListItem>
+          <Icon name="schedule" />
+          <Text>{new Date(timeAdded).toLocaleString('fi-FI')}</Text>
+        </ListItem>
+        <ListItem>
+          <Icon name="person" />
+          <Text>
+            {owner.username} ({owner.full_name})
+          </Text>
+        </ListItem>
+      </Card>
+    </ScrollView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingTop: 40,
-  },
-  image: {
-    width: 200,
-    height: 300,
-  },
-});
 
 Single.propTypes = {
   route: PropTypes.object,

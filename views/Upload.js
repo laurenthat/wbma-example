@@ -2,18 +2,20 @@ import {Button, Input} from '@rneui/base';
 import {Card} from '@rneui/themed';
 import PropTypes from 'prop-types';
 import {useForm, Controller} from 'react-hook-form';
-import {ActivityIndicator, Alert, Keyboard} from 'react-native';
+import {Alert, Keyboard} from 'react-native';
 import {ScrollView, TouchableOpacity} from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import {useCallback, useContext, useState} from 'react';
+import React, {useCallback, useContext, useRef, useState} from 'react';
 import {useMedia, useTag} from '../hooks/ApiHooks';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {MainContext} from '../contexts/MainContext';
 import {useFocusEffect} from '@react-navigation/native';
+import {Video} from 'expo-av';
 import {appId} from '../utils/variables';
 
 const Upload = ({navigation}) => {
   const [mediafile, setMediafile] = useState({});
+  const video = useRef(null);
   const [loading, setLoading] = useState(false);
   const {postMedia} = useMedia();
   const {postTag} = useTag();
@@ -115,7 +117,16 @@ const Upload = ({navigation}) => {
       <TouchableOpacity onPress={() => Keyboard.dismiss()} activeOpacity={1}>
         <Card>
           {mediafile.type === 'video' ? (
-            <Card.Title>Video</Card.Title>
+            <Video
+              ref={video}
+              source={{uri: mediafile.url}}
+              style={{width: '100%', height: 200}}
+              resizeMode="cover"
+              useNativeControls
+              onError={(error) => {
+                console.log(error);
+              }}
+            />
           ) : (
             <Card.Image
               source={{
