@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useContext, useEffect, useRef, useState} from 'react';
 import {uploadsUrl} from '../utils/variables';
 import PropTypes from 'prop-types';
 import {Text, Card, ListItem, Icon} from '@rneui/themed';
@@ -6,6 +6,8 @@ import {Video} from 'expo-av';
 import {ScrollView} from 'react-native';
 import {useFavourite, useUser} from '../hooks/ApiHooks';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {MainContext} from '../contexts/MainContext';
+import * as ScreenOrientation from 'expo-screen-orientation';
 
 const Single = ({route}) => {
   console.log(route.params);
@@ -22,6 +24,7 @@ const Single = ({route}) => {
   const [owner, setOwner] = useState({});
   const [likes, setLikes] = useState([]);
   const [userLikesIt, setUserLikesIt] = useState(false);
+  const {user} = useContext(MainContext);
   const {getUserById} = useUser();
   const {getFavouritesByFileId, postFavourite, deleteFavourite} =
     useFavourite();
@@ -35,16 +38,23 @@ const Single = ({route}) => {
 
   const getLikes = async () => {
     const likes = await getFavouritesByFileId(fileId);
-    console.log('likes', likes);
+    // console.log('likes', likes, 'user', user);
     setLikes(likes);
-    // TODO: check if the current user id is included in the 'likes' array and
-    // set the 'userLikesIt' accordingly
+    // check if the current user id is included in the 'likes' array and
+    // set the 'userLikesIt' state accordingly
+    for (const like of likes) {
+      if (like.user_id === user.user_id) {
+        setUserLikesIt(true);
+        break;
+      }
+    }
   };
 
   const likeFile = async () => {
     try {
       const token = await AsyncStorage.getItem('userToken');
       await postFavourite(fileId, token);
+      setUserLikesIt(true);
       getLikes();
     } catch (error) {
       // note: you cannot like same file multiple times
@@ -55,6 +65,7 @@ const Single = ({route}) => {
     try {
       const token = await AsyncStorage.getItem('userToken');
       await deleteFavourite(fileId, token);
+      setUserLikesIt(false);
       getLikes();
     } catch (error) {
       // note: you cannot like same file multiple times
@@ -62,10 +73,40 @@ const Single = ({route}) => {
     }
   };
 
+  // function for changing screen orientation
+  const unlock = async () => {
+    try {
+      await ScreenOrientation.unlockAsync();
+    } catch (error) {
+      console.error('unlock', error.message);
+    }
+  };
+  const lock = async () => {
+    try {
+      await ScreenOrientation.lockAsync();
+      ScreenOrientation.OrientationLock.PORTRAIT_UP;
+    } catch (error) {
+      console.log('lock', error.message);
+    }
+  };
+
   useEffect(() => {
     getOwner();
     getLikes();
+    unlock();
+
+    return () => {
+      lock();
+    };
   }, []);
+
+  const showVideoInFullScreen = async () => {
+    try {
+      if (video) await video.presentFullscreenPlayer();
+    } catch (error) {
+      console.error('showVideoInFullScreen', error);
+    }
+  };
 
   return (
     <ScrollView>
@@ -89,7 +130,7 @@ const Single = ({route}) => {
         )}
         <Card.Divider />
         {description && (
-          <ListItem>
+          <ListItem onPress={showVideoInFullScreen}>
             <Text>{description}</Text>
           </ListItem>
         )}
