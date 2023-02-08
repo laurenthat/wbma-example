@@ -1,66 +1,43 @@
-import {Image, StyleSheet, View, Text, TouchableOpacity} from 'react-native';
+import {Avatar, ButtonGroup, ListItem as RNEListItem} from '@rneui/themed';
 import PropTypes from 'prop-types';
+import {useContext} from 'react';
+import {MainContext} from '../contexts/MainContext';
 import {uploadsUrl} from '../utils/variables';
 
-// const ListItem = (props) => {
-//   const item = props.singleMedia;
-//   return (
-//     <TouchableOpacity>
-//       <Image
-//         style={{width: 100, height: 100}}
-//         source={{uri: uploadsUrl + item.thumbnails?.w160}}
-//       ></Image>
-//       <View>
-//         <Text>{item.title}</Text>
-//         <Text>{item.description}</Text>
-//       </View>
-//     </TouchableOpacity>
-//   );
-// };
-
 const ListItem = ({singleMedia, navigation}) => {
+  const {user} = useContext(MainContext);
   const item = singleMedia;
   return (
-    <TouchableOpacity
-      style={styles.row}
+    <RNEListItem
       onPress={() => {
         navigation.navigate('Single', item);
       }}
     >
-      <View style={styles.box}>
-        <Image
-          style={styles.image}
-          source={{uri: uploadsUrl + item.thumbnails?.w160}} // ? - is checking if the thumbnails exist then it gets them but if they don't exist it just moves along. Suppresses the error if thumbnails don't exist
-        />
-      </View>
-      <View style={styles.box}>
-        <Text style={styles.listTitle}>{item.title}</Text>
-        <Text>{item.description}</Text>
-      </View>
-    </TouchableOpacity>
+      <Avatar size="large" source={{uri: uploadsUrl + item.thumbnails?.w160}} />
+      <RNEListItem.Content>
+        <RNEListItem.Title>{item.title}</RNEListItem.Title>
+        <RNEListItem.Subtitle numberOfLines={3}>
+          {item.description}
+        </RNEListItem.Subtitle>
+        {item.user_id === user.user_id && (
+          <ButtonGroup
+            buttons={['Modify', 'Delete']}
+            rounded
+            onPress={(index) => {
+              if (index === 0) {
+                console.log('Modify pressed');
+              } else {
+                console.log('Delete pressed');
+              }
+            }}
+          />
+        )}
+        {/* how index is used: if it's 0 then it's modify button and if it's 1 it's delete */}
+      </RNEListItem.Content>
+      <RNEListItem.Chevron />
+    </RNEListItem>
   );
 };
-
-const styles = StyleSheet.create({
-  row: {
-    flexDirection: 'row',
-    backgroundColor: '#ccc',
-    marginBottom: 10,
-  },
-  box: {
-    flex: 1,
-    padding: 10,
-  },
-  image: {
-    flex: 1,
-    minHeight: 100,
-  },
-  listTitle: {
-    fontWeight: 'bold',
-    fontSize: 20,
-    paddingBottom: 15,
-  },
-});
 
 ListItem.propTypes = {
   singleMedia: PropTypes.object,
