@@ -121,6 +121,7 @@ const Modify = ({navigation, route}) => {
 
 Modify.propTypes = {
   navigation: PropTypes.object,
+  route: PropTypes.object,
 };
 
 export default Modify;
